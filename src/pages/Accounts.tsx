@@ -16,10 +16,26 @@ const typeLabels = {
   credit: "Cartao de Credito",
 };
 
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
 const Accounts = () => {
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.from("accounts").select("*");
+      if (!error) setAccounts(data || []);
+      setLoading(false);
+    };
+    fetchAccounts();
+  }, []);
+
   const totalBalance = accounts
     .filter((a) => a.type !== "credit")
-    .reduce((s, a) => s + a.balance, 0);
+    .reduce((s, a) => s + (a.balance || 0), 0);
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -32,52 +48,61 @@ const Accounts = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {accounts.map((acc) => {
-          const Icon = typeIcons[acc.type];
-          const isCredit = acc.type === "credit";
-          const usedPct =
-            isCredit && acc.limit
-              ? Math.round(((acc.used || 0) / acc.limit) * 100)
-              : 0;
+      {loading ? (
+        <div className="rounded-2xl bg-card p-6 shadow-card">
+          <p className="text-sm text-muted-foreground">Carregando contas...</p>
+        </div>
+      ) : accounts.length === 0 ? (
+        <div className="rounded-2xl bg-card p-6 shadow-card">
+          <p className="text-sm text-muted-foreground">Nenhuma conta cadastrada ainda.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {accounts.map((acc) => {
+            const Icon = typeIcons[acc.type];
+            const isCredit = acc.type === "credit";
+            const usedPct =
+              isCredit && acc.limit
+                ? Math.round(((acc.used || 0) / acc.limit) * 100)
+                : 0;
 
-          return (
-            <div
-              key={acc.id}
-              className={cn(
-                "rounded-2xl p-5 shadow-card hover:shadow-card-hover transition-all duration-300 animate-fade-in",
-                isCredit
-                  ? "bg-gradient-card text-primary-foreground"
-                  : "bg-card",
-              )}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      "flex h-10 w-10 items-center justify-center rounded-xl",
-                      isCredit ? "bg-primary-foreground/20" : "bg-secondary",
-                    )}
-                  >
-                    <Icon
+            return (
+              <div
+                key={acc.id}
+                className={cn(
+                  "rounded-2xl p-5 shadow-card hover:shadow-card-hover transition-all duration-300 animate-fade-in",
+                  isCredit
+                    ? "bg-gradient-card text-primary-foreground"
+                    : "bg-card",
+                )}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div
                       className={cn(
-                        "h-5 w-5",
-                        isCredit
-                          ? "text-primary-foreground"
-                          : "text-muted-foreground",
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <p
-                      className={cn(
-                        "text-sm font-semibold",
-                        isCredit
-                          ? "text-primary-foreground"
-                          : "text-foreground",
+                        "flex h-10 w-10 items-center justify-center rounded-xl",
+                        isCredit ? "bg-primary-foreground/20" : "bg-secondary",
                       )}
                     >
-                      {acc.name}
+                      <Icon
+                        className={cn(
+                          "h-5 w-5",
+                          isCredit
+                            ? "text-primary-foreground"
+                            : "text-muted-foreground",
+                        )}
+                      />
+                    </div>
+                    <div>
+                      <p
+                        className={cn(
+                          "text-sm font-semibold",
+                          isCredit
+                            ? "text-primary-foreground"
+                            : "text-foreground",
+                        )}
+                      >
+                        {acc.name}
                     </p>
                     <p
                       className={cn(

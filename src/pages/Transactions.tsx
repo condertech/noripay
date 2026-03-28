@@ -1,5 +1,4 @@
-import { useState } from "react";
-// importações de mock removidas para uso do Supabase
+import { useEffect, useState } from "react";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -33,13 +32,63 @@ import { toast } from "sonner";
 
 type FilterType = "all" | "income" | "expense";
 
+import { supabase } from "@/lib/supabase";
+
 const Transactions = () => {
-  const [txList, setTxList] = useState<Transaction[]>(mockTransactions);
+  const [txList, setTxList] = useState<Transaction[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterType>("all");
   const [formOpen, setFormOpen] = useState(false);
   const [editTx, setEditTx] = useState<Transaction | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const fetchTransactions = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("transactions")
+      .select("*")
+      .order("date", { ascending: false });
+    if (!error) setTxList(data || []);
+    setLoading(false);
+  };
+
+  const handleSave = async (tx: Transaction) => {
+    if (tx.id && txList.find((t) => t.id === tx.id)) {
+      // update
+      const { error } = await supabase
+        .from("transactions")
+        .update({ ...tx })
+        .eq("id", tx.id);
+      if (!error) toast.success("Transacao atualizada com sucesso");
+    } else {
+      // insert
+      const { error } = await supabase.from("transactions").insert([{ ...tx }]);
+      if (!error) toast.success("Transacao adicionada com sucesso");
+    }
+    setEditTx(null);
+    fetchTransactions();
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    const { error } = await supabase
+      .from("transactions")
+      .delete()
+      .eq("id", deleteId);
+    if (!error) toast.success("Transacao removida");
+    setDeleteId(null);
+    fetchTransactions();
+  };
+
+  const handleEdit = (tx: Transaction) => {
+    setEditTx(tx);
+    setFormOpen(true);
+  };
 
   const filtered = txList.filter((tx) => {
     const matchSearch = tx.title.toLowerCase().includes(search.toLowerCase());
@@ -52,31 +101,6 @@ const Transactions = () => {
     { label: "Receitas", value: "income" },
     { label: "Despesas", value: "expense" },
   ];
-
-  const handleSave = (tx: Transaction) => {
-    setTxList((prev) => {
-      const exists = prev.find((t) => t.id === tx.id);
-      if (exists) {
-        toast.success("Transacao atualizada com sucesso");
-        return prev.map((t) => (t.id === tx.id ? tx : t));
-      }
-      toast.success("Transacao adicionada com sucesso");
-      return [tx, ...prev];
-    });
-    setEditTx(null);
-  };
-
-  const handleDelete = () => {
-    if (!deleteId) return;
-    setTxList((prev) => prev.filter((t) => t.id !== deleteId));
-    setDeleteId(null);
-    toast.success("Transacao removida");
-  };
-
-  const handleEdit = (tx: Transaction) => {
-    setEditTx(tx);
-    setFormOpen(true);
-  };
 
   const handleNewTransaction = () => {
     setEditTx(null);
