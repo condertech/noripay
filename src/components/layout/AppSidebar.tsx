@@ -46,18 +46,22 @@ export function AppSidebar() {
   const location = useLocation();
 
   const isActive = (path: string) =>
-    path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+    path === "/"
+      ? location.pathname === "/"
+      : location.pathname.startsWith(path);
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
       <SidebarHeader className="p-4 pb-6">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-primary">
-            <span className="text-sm font-bold text-sidebar-primary-foreground">V</span>
+            <span className="text-sm font-bold text-sidebar-primary-foreground">
+              V
+            </span>
           </div>
           {!collapsed && (
             <span className="font-display text-lg font-bold text-sidebar-foreground tracking-tight">
-              Viora
+              NORIPAY
             </span>
           )}
         </div>

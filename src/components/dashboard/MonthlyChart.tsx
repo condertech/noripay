@@ -63,3 +63,16 @@ export function MonthlyChart() {
     </div>
   );
 }
+// Fallback seguro para monthlyData
+const monthlyData = {
+  labels: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"],
+  datasets: [
+    {
+      label: "Saldo",
+      data: [0, 0, 0, 0, 0, 0],
+      borderColor: "#6366f1",
+      backgroundColor: "rgba(99,102,241,0.1)",
+      tension: 0.4,
+    },
+  ],
+};

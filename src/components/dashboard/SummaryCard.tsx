@@ -1,6 +1,6 @@
 import { LucideIcon } from "lucide-react";
 // importação de mock removida para uso do Supabase
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 interface SummaryCardProps {
   title: string;

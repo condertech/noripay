@@ -1,5 +1,14 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { formatCurrency } from "@/lib/utils";
 // importações de mock removidas para uso do Supabase
+
+// Fallback seguro para categoryExpenses
+const categoryExpenses = [
+  { name: "Alimentação", value: 0, color: "#f87171" },
+  { name: "Transporte", value: 0, color: "#60a5fa" },
+  { name: "Lazer", value: 0, color: "#fbbf24" },
+  { name: "Outros", value: 0, color: "#a3e635" },
+];
 
 export function ExpenseChart() {
   const total = categoryExpenses.reduce((s, c) => s + c.value, 0);
