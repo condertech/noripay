@@ -25,6 +25,7 @@ import {
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { supabase } from "@/lib/supabase";
 
 const mainNav = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -131,6 +132,15 @@ export function AppSidebar() {
             <SidebarMenuButton className="h-10 rounded-lg">
               <Settings className="h-[18px] w-[18px]" />
               {!collapsed && <span>Configuracoes</span>}
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              className="h-10 rounded-lg text-destructive hover:text-destructive"
+              onClick={() => supabase.auth.signOut()}
+            >
+              <LogOut className="h-[18px] w-[18px]" />
+              {!collapsed && <span>Sair</span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

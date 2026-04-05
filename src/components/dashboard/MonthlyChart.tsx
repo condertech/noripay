@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -6,11 +7,62 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
-// importações de mock removidas para uso do Supabase
+import { supabase } from "@/lib/supabase";
+import { formatCurrency } from "@/lib/utils";
+
+type MonthEntry = { month: string; receitas: number; despesas: number };
+
+const MONTH_LABELS = [
+  "Jan",
+  "Fev",
+  "Mar",
+  "Abr",
+  "Mai",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Set",
+  "Out",
+  "Nov",
+  "Dez",
+];
 
 export function MonthlyChart() {
+  const [data, setData] = useState<MonthEntry[]>([]);
+
+  useEffect(() => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+    const startStr = start.toISOString().split("T")[0];
+
+    supabase
+      .from("transactions")
+      .select("amount, type, date")
+      .gte("date", startStr)
+      .then(({ data: rows }) => {
+        if (!rows) return;
+        const map: Record<string, MonthEntry> = {};
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+          map[key] = {
+            month: MONTH_LABELS[d.getMonth()],
+            receitas: 0,
+            despesas: 0,
+          };
+        }
+        for (const row of rows) {
+          const key = row.date.slice(0, 7);
+          if (map[key]) {
+            if (row.type === "income") map[key].receitas += row.amount;
+            else map[key].despesas += row.amount;
+          }
+        }
+        setData(Object.values(map));
+      });
+  }, []);
+
   return (
     <div className="rounded-2xl bg-card p-5 shadow-card animate-fade-in">
       <h3 className="font-display font-semibold text-foreground mb-4">
@@ -18,7 +70,7 @@ export function MonthlyChart() {
       </h3>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={monthlyData} barGap={4}>
+          <BarChart data={data} barGap={4}>
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="hsl(240,6%,90%)"
@@ -63,16 +115,3 @@ export function MonthlyChart() {
     </div>
   );
 }
-// Fallback seguro para monthlyData
-const monthlyData = {
-  labels: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"],
-  datasets: [
-    {
-      label: "Saldo",
-      data: [0, 0, 0, 0, 0, 0],
-      borderColor: "#6366f1",
-      backgroundColor: "rgba(99,102,241,0.1)",
-      tension: 0.4,
-    },
-  ],
-};

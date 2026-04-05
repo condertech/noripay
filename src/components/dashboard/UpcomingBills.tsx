@@ -15,6 +15,14 @@ const statusConfig = {
   },
 };
 
+type Bill = {
+  id: string;
+  name: string;
+  due_date: string;
+  amount: number;
+  status?: "paid" | "pending" | "overdue";
+};
+
 export function UpcomingBills() {
   const [bills, setBills] = useState<Bill[]>([]);
 

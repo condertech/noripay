@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { SummaryCard } from "@/components/dashboard/SummaryCard";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { ExpenseChart } from "@/components/dashboard/ExpenseChart";
@@ -6,12 +7,54 @@ import { EvolutionChart } from "@/components/dashboard/EvolutionChart";
 import { UpcomingBills } from "@/components/dashboard/UpcomingBills";
 import { GoalsPreview } from "@/components/dashboard/GoalsPreview";
 import { Wallet, TrendingUp, TrendingDown, PiggyBank } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 const Dashboard = () => {
-  const totalIncome = 11700;
-  const totalExpenses = 4635.20;
-  const balance = 33110.30;
+  const [balance, setBalance] = useState(0);
+  const [totalIncome, setTotalIncome] = useState(0);
+  const [totalExpenses, setTotalExpenses] = useState(0);
+
+  useEffect(() => {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+      .toISOString()
+      .split("T")[0];
+
+    // Total balance from non-credit accounts
+    supabase
+      .from("accounts")
+      .select("balance, type")
+      .then(({ data }) => {
+        if (data) {
+          const total = data
+            .filter((a) => a.type !== "credit")
+            .reduce((s, a) => s + (a.balance || 0), 0);
+          setBalance(total);
+        }
+      });
+
+    // Monthly income and expenses
+    supabase
+      .from("transactions")
+      .select("amount, type")
+      .gte("date", firstDay)
+      .then(({ data }) => {
+        if (data) {
+          const income = data
+            .filter((t) => t.type === "income")
+            .reduce((s, t) => s + t.amount, 0);
+          const expenses = data
+            .filter((t) => t.type === "expense")
+            .reduce((s, t) => s + t.amount, 0);
+          setTotalIncome(income);
+          setTotalExpenses(expenses);
+        }
+      });
+  }, []);
+
   const savings = totalIncome - totalExpenses;
+  const savingsPct =
+    totalIncome > 0 ? Math.round((savings / totalIncome) * 100) : 0;
 
   return (
     <div className="space-y-6 max-w-7xl">
@@ -30,32 +73,26 @@ const Dashboard = () => {
           value={balance}
           icon={Wallet}
           variant="primary"
-          trend="+12.5% vs mes anterior"
-          trendUp
         />
         <SummaryCard
-          title="Receitas"
+          title="Receitas do mês"
           value={totalIncome}
           icon={TrendingUp}
           variant="success"
-          trend="+R$ 2.900 extras"
-          trendUp
         />
         <SummaryCard
-          title="Despesas"
+          title="Despesas do mês"
           value={totalExpenses}
           icon={TrendingDown}
           variant="destructive"
-          trend="-8.3% vs mes anterior"
-          trendUp
         />
         <SummaryCard
           title="Economia"
-          value={savings}
+          value={savings > 0 ? savings : 0}
           icon={PiggyBank}
           variant="warning"
-          trend="60.4% do salario"
-          trendUp
+          trend={totalIncome > 0 ? `${savingsPct}% da receita` : undefined}
+          trendUp={savings > 0}
         />
       </div>
 

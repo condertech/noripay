@@ -8,6 +8,9 @@ import Dashboard from "./pages/Dashboard";
 import Transactions from "./pages/Transactions";
 import Accounts from "./pages/Accounts";
 import Goals from "./pages/Goals";
+import Calendario from "./pages/Calendario";
+import Relatorios from "./pages/Relatorios";
+import Alertas from "./pages/Alertas";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 import { useEffect, useState } from "react";
@@ -64,6 +67,9 @@ const App = () => (
             <Route path="/contas" element={<Accounts />} />
             <Route path="/cartoes" element={<Accounts />} />
             <Route path="/metas" element={<Goals />} />
+            <Route path="/calendario" element={<Calendario />} />
+            <Route path="/relatorios" element={<Relatorios />} />
+            <Route path="/alertas" element={<Alertas />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

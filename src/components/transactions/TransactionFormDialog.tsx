@@ -17,9 +17,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-// importações de mock removidas para uso do Supabase
+import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
+
+type Transaction = {
+  id: string;
+  title: string;
+  description?: string;
+  amount: number;
+  type: "income" | "expense";
+  category?: string;
+  category_icon?: string;
+  account?: string;
+  date: string;
+  status: "paid" | "pending" | "overdue";
+  recurrent: boolean;
+};
 
 const categories = [
   { value: "Salario", label: "Salario" },
@@ -58,6 +72,14 @@ export function TransactionFormDialog({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
+  const [accounts, setAccounts] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("accounts")
+      .select("id, name")
+      .then(({ data }) => setAccounts(data || []));
+  }, []);
   const [category, setCategory] = useState("");
   const [account, setAccount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -105,7 +127,7 @@ export function TransactionFormDialog({
       amount: parseFloat(amount),
       type,
       category,
-      categoryIcon: "Tag",
+      category_icon: "Tag",
       account,
       date,
       status,
