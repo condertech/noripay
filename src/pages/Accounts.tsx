@@ -63,8 +63,12 @@ const Accounts = () => {
     e.preventDefault();
     if (!form.name || !form.type) return;
     setSaving(true);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     const { error } = await supabase.from("accounts").insert([
       {
+        user_id: user?.id,
         name: form.name,
         institution: form.institution,
         type: form.type,

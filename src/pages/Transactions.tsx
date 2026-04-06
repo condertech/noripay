@@ -58,6 +58,9 @@ const Transactions = () => {
   };
 
   const handleSave = async (tx: Transaction) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (tx.id && txList.find((t) => t.id === tx.id)) {
       // update
       const { error } = await supabase
@@ -67,7 +70,9 @@ const Transactions = () => {
       if (!error) toast.success("Transacao atualizada com sucesso");
     } else {
       // insert
-      const { error } = await supabase.from("transactions").insert([{ ...tx }]);
+      const { error } = await supabase
+        .from("transactions")
+        .insert([{ ...tx, user_id: user?.id }]);
       if (!error) toast.success("Transacao adicionada com sucesso");
     }
     setEditTx(null);
