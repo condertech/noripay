@@ -1,8 +1,27 @@
 // importações de mock removidas para uso do Supabase
-import { CreditCard, Building2, Wallet, PiggyBank, Plus } from "lucide-react";
+import {
+  CreditCard,
+  Building2,
+  Wallet,
+  PiggyBank,
+  Plus,
+  type LucideIcon,
+} from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 
-const typeIcons: Record<string, any> = {
+interface Account {
+  id: string;
+  name: string;
+  institution?: string;
+  type: "checking" | "savings" | "wallet" | "credit";
+  balance: number;
+  limit?: number;
+  used?: number;
+  closing_day?: number;
+  due_day?: number;
+}
+
+const typeIcons: Record<string, LucideIcon> = {
   checking: Building2,
   savings: PiggyBank,
   wallet: Wallet,
@@ -37,7 +56,7 @@ import {
 import { toast } from "sonner";
 
 const Accounts = () => {
-  const [accounts, setAccounts] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -302,8 +321,8 @@ const Accounts = () => {
                       <span>Limite: {formatCurrency(acc.limit || 0)}</span>
                     </div>
                     <div className="flex gap-4 text-xs text-primary-foreground/70 pt-1">
-                      <span>Fecha dia {acc.closingDay}</span>
-                      <span>Vence dia {acc.dueDay}</span>
+                      <span>Fecha dia {acc.closing_day}</span>
+                      <span>Vence dia {acc.due_day}</span>
                     </div>
                   </div>
                 ) : (
