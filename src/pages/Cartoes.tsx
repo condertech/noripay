@@ -18,6 +18,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -403,6 +404,9 @@ export default function Cartoes() {
             <DialogTitle className="font-display">
               {editCard ? "Editar Cartão" : "Novo Cartão de Crédito"}
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              Preencha os dados do cartão de crédito
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSave} className="space-y-4 pt-2">
             <div className="grid grid-cols-2 gap-3">

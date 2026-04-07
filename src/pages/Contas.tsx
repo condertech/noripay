@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -503,6 +504,9 @@ export default function Contas() {
             <DialogTitle className="font-display">
               {editAccount ? "Editar Conta" : "Nova Conta"}
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              Preencha os dados da conta bancária
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSave} className="space-y-4 pt-2">
             <div className="space-y-2">
