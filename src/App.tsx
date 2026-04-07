@@ -14,6 +14,8 @@ import Relatorios from "./pages/Relatorios";
 import Alertas from "./pages/Alertas";
 import Configuracoes from "./pages/Configuracoes";
 import Privacidade from "./pages/Privacidade";
+import Dividas from "./pages/Dividas";
+import Cobrancas from "./pages/Cobrancas";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 import { useEffect, useState } from "react";
@@ -75,6 +77,8 @@ const App = () => (
             <Route path="/alertas" element={<Alertas />} />
             <Route path="/configuracoes" element={<Configuracoes />} />
             <Route path="/privacidade" element={<Privacidade />} />
+            <Route path="/dividas" element={<Dividas />} />
+            <Route path="/cobrancas" element={<Cobrancas />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

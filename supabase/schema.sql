@@ -154,11 +154,116 @@ CREATE POLICY "bills: update own"  ON public.bills FOR UPDATE USING (auth.uid() 
 CREATE POLICY "bills: delete own"  ON public.bills FOR DELETE USING (auth.uid() = user_id);
 
 -- ============================================================
+-- 5b. TABELAS NOVAS — Dívidas, A Receber, Entradas Fixas
+-- ============================================================
+
+-- DEBTS (Dívidas)
+CREATE TABLE IF NOT EXISTS public.debts (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id        UUID NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
+  name           TEXT NOT NULL,
+  creditor       TEXT,
+  total_amount   NUMERIC(15, 2) NOT NULL CHECK (total_amount > 0),
+  paid_amount    NUMERIC(15, 2) NOT NULL DEFAULT 0 CHECK (paid_amount >= 0),
+  due_date       DATE,
+  status         TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'paid', 'overdue')),
+  installments   INTEGER,
+  notes          TEXT,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- RECEIVABLES (A Receber)
+CREATE TABLE IF NOT EXISTS public.receivables (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id        UUID NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
+  name           TEXT NOT NULL,
+  debtor         TEXT,
+  amount         NUMERIC(15, 2) NOT NULL CHECK (amount > 0),
+  due_date       DATE NOT NULL,
+  status         TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('received', 'pending', 'overdue')),
+  notes          TEXT,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- RECURRING_ENTRIES (Entradas/Saídas Fixas)
+CREATE TABLE IF NOT EXISTS public.recurring_entries (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id        UUID NOT NULL DEFAULT auth.uid() REFERENCES auth.users(id) ON DELETE CASCADE,
+  name           TEXT NOT NULL,
+  amount         NUMERIC(15, 2) NOT NULL CHECK (amount > 0),
+  type           TEXT NOT NULL CHECK (type IN ('income', 'expense')),
+  day_of_month   SMALLINT CHECK (day_of_month BETWEEN 1 AND 31),
+  active         BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- ============================================================
+-- 5c. TRIGGERS para novas tabelas
+-- ============================================================
+DROP TRIGGER IF EXISTS trg_debts_updated_at ON public.debts;
+CREATE TRIGGER trg_debts_updated_at
+  BEFORE UPDATE ON public.debts
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_receivables_updated_at ON public.receivables;
+CREATE TRIGGER trg_receivables_updated_at
+  BEFORE UPDATE ON public.receivables
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_recurring_entries_updated_at ON public.recurring_entries;
+CREATE TRIGGER trg_recurring_entries_updated_at
+  BEFORE UPDATE ON public.recurring_entries
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+-- ============================================================
+-- 5d. RLS para novas tabelas
+-- ============================================================
+ALTER TABLE public.debts             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.receivables       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.recurring_entries ENABLE ROW LEVEL SECURITY;
+
+-- DEBTS
+DROP POLICY IF EXISTS "debts: select own" ON public.debts;
+DROP POLICY IF EXISTS "debts: insert own" ON public.debts;
+DROP POLICY IF EXISTS "debts: update own" ON public.debts;
+DROP POLICY IF EXISTS "debts: delete own" ON public.debts;
+CREATE POLICY "debts: select own"  ON public.debts FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "debts: insert own"  ON public.debts FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "debts: update own"  ON public.debts FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "debts: delete own"  ON public.debts FOR DELETE USING (auth.uid() = user_id);
+
+-- RECEIVABLES
+DROP POLICY IF EXISTS "receivables: select own" ON public.receivables;
+DROP POLICY IF EXISTS "receivables: insert own" ON public.receivables;
+DROP POLICY IF EXISTS "receivables: update own" ON public.receivables;
+DROP POLICY IF EXISTS "receivables: delete own" ON public.receivables;
+CREATE POLICY "receivables: select own"  ON public.receivables FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "receivables: insert own"  ON public.receivables FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "receivables: update own"  ON public.receivables FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "receivables: delete own"  ON public.receivables FOR DELETE USING (auth.uid() = user_id);
+
+-- RECURRING_ENTRIES
+DROP POLICY IF EXISTS "recurring_entries: select own" ON public.recurring_entries;
+DROP POLICY IF EXISTS "recurring_entries: insert own" ON public.recurring_entries;
+DROP POLICY IF EXISTS "recurring_entries: update own" ON public.recurring_entries;
+DROP POLICY IF EXISTS "recurring_entries: delete own" ON public.recurring_entries;
+CREATE POLICY "recurring_entries: select own"  ON public.recurring_entries FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "recurring_entries: insert own"  ON public.recurring_entries FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "recurring_entries: update own"  ON public.recurring_entries FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "recurring_entries: delete own"  ON public.recurring_entries FOR DELETE USING (auth.uid() = user_id);
+
+-- ============================================================
 -- 7. ÍNDICES — performance nas queries mais comuns
 -- ============================================================
-CREATE INDEX IF NOT EXISTS idx_transactions_user_date   ON public.transactions(user_id, date DESC);
-CREATE INDEX IF NOT EXISTS idx_transactions_user_type   ON public.transactions(user_id, type);
-CREATE INDEX IF NOT EXISTS idx_transactions_user_status ON public.transactions(user_id, status);
-CREATE INDEX IF NOT EXISTS idx_accounts_user            ON public.accounts(user_id);
-CREATE INDEX IF NOT EXISTS idx_goals_user_deadline      ON public.goals(user_id, deadline);
-CREATE INDEX IF NOT EXISTS idx_bills_user_due_date      ON public.bills(user_id, due_date);
+CREATE INDEX IF NOT EXISTS idx_transactions_user_date      ON public.transactions(user_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_transactions_user_type      ON public.transactions(user_id, type);
+CREATE INDEX IF NOT EXISTS idx_transactions_user_status    ON public.transactions(user_id, status);
+CREATE INDEX IF NOT EXISTS idx_accounts_user               ON public.accounts(user_id);
+CREATE INDEX IF NOT EXISTS idx_goals_user_deadline         ON public.goals(user_id, deadline);
+CREATE INDEX IF NOT EXISTS idx_bills_user_due_date         ON public.bills(user_id, due_date);
+CREATE INDEX IF NOT EXISTS idx_debts_user_status           ON public.debts(user_id, status);
+CREATE INDEX IF NOT EXISTS idx_receivables_user_due        ON public.receivables(user_id, due_date);
+CREATE INDEX IF NOT EXISTS idx_recurring_entries_user_type ON public.recurring_entries(user_id, type);

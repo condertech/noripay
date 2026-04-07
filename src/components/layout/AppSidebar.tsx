@@ -9,6 +9,8 @@ import {
   Bell,
   Settings,
   LogOut,
+  AlertTriangle,
+  Receipt,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -33,6 +35,8 @@ const mainNav = [
   { title: "Contas", url: "/contas", icon: Wallet },
   { title: "Cartoes", url: "/cartoes", icon: CreditCard },
   { title: "Metas", url: "/metas", icon: Target },
+  { title: "Dívidas", url: "/dividas", icon: AlertTriangle },
+  { title: "Cobranças", url: "/cobrancas", icon: Receipt },
 ];
 
 const secondaryNav = [
