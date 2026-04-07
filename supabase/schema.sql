@@ -84,18 +84,22 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS trg_accounts_updated_at ON public.accounts;
 CREATE TRIGGER trg_accounts_updated_at
   BEFORE UPDATE ON public.accounts
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
+DROP TRIGGER IF EXISTS trg_transactions_updated_at ON public.transactions;
 CREATE TRIGGER trg_transactions_updated_at
   BEFORE UPDATE ON public.transactions
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
+DROP TRIGGER IF EXISTS trg_goals_updated_at ON public.goals;
 CREATE TRIGGER trg_goals_updated_at
   BEFORE UPDATE ON public.goals
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
+DROP TRIGGER IF EXISTS trg_bills_updated_at ON public.bills;
 CREATE TRIGGER trg_bills_updated_at
   BEFORE UPDATE ON public.bills
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
@@ -110,24 +114,40 @@ ALTER TABLE public.goals        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bills        ENABLE ROW LEVEL SECURITY;
 
 -- ACCOUNTS
+DROP POLICY IF EXISTS "accounts: select own" ON public.accounts;
+DROP POLICY IF EXISTS "accounts: insert own" ON public.accounts;
+DROP POLICY IF EXISTS "accounts: update own" ON public.accounts;
+DROP POLICY IF EXISTS "accounts: delete own" ON public.accounts;
 CREATE POLICY "accounts: select own"  ON public.accounts FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "accounts: insert own"  ON public.accounts FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "accounts: update own"  ON public.accounts FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "accounts: delete own"  ON public.accounts FOR DELETE USING (auth.uid() = user_id);
 
 -- TRANSACTIONS
+DROP POLICY IF EXISTS "transactions: select own" ON public.transactions;
+DROP POLICY IF EXISTS "transactions: insert own" ON public.transactions;
+DROP POLICY IF EXISTS "transactions: update own" ON public.transactions;
+DROP POLICY IF EXISTS "transactions: delete own" ON public.transactions;
 CREATE POLICY "transactions: select own"  ON public.transactions FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "transactions: insert own"  ON public.transactions FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "transactions: update own"  ON public.transactions FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "transactions: delete own"  ON public.transactions FOR DELETE USING (auth.uid() = user_id);
 
 -- GOALS
+DROP POLICY IF EXISTS "goals: select own" ON public.goals;
+DROP POLICY IF EXISTS "goals: insert own" ON public.goals;
+DROP POLICY IF EXISTS "goals: update own" ON public.goals;
+DROP POLICY IF EXISTS "goals: delete own" ON public.goals;
 CREATE POLICY "goals: select own"  ON public.goals FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "goals: insert own"  ON public.goals FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "goals: update own"  ON public.goals FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "goals: delete own"  ON public.goals FOR DELETE USING (auth.uid() = user_id);
 
 -- BILLS
+DROP POLICY IF EXISTS "bills: select own" ON public.bills;
+DROP POLICY IF EXISTS "bills: insert own" ON public.bills;
+DROP POLICY IF EXISTS "bills: update own" ON public.bills;
+DROP POLICY IF EXISTS "bills: delete own" ON public.bills;
 CREATE POLICY "bills: select own"  ON public.bills FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "bills: insert own"  ON public.bills FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "bills: update own"  ON public.bills FOR UPDATE USING (auth.uid() = user_id);

@@ -6,11 +6,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Transactions from "./pages/Transactions";
-import Accounts from "./pages/Accounts";
+import Contas from "./pages/Contas";
+import Cartoes from "./pages/Cartoes";
 import Goals from "./pages/Goals";
 import Calendario from "./pages/Calendario";
 import Relatorios from "./pages/Relatorios";
 import Alertas from "./pages/Alertas";
+import Configuracoes from "./pages/Configuracoes";
+import Privacidade from "./pages/Privacidade";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
 import { useEffect, useState } from "react";
@@ -64,12 +67,14 @@ const App = () => (
           >
             <Route path="/" element={<Dashboard />} />
             <Route path="/transacoes" element={<Transactions />} />
-            <Route path="/contas" element={<Accounts />} />
-            <Route path="/cartoes" element={<Accounts />} />
+            <Route path="/contas" element={<Contas />} />
+            <Route path="/cartoes" element={<Cartoes />} />
             <Route path="/metas" element={<Goals />} />
             <Route path="/calendario" element={<Calendario />} />
             <Route path="/relatorios" element={<Relatorios />} />
             <Route path="/alertas" element={<Alertas />} />
+            <Route path="/configuracoes" element={<Configuracoes />} />
+            <Route path="/privacidade" element={<Privacidade />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

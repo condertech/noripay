@@ -74,12 +74,8 @@ const Goals = () => {
     e.preventDefault();
     if (!form.name || !form.target_amount || !form.deadline) return;
     setSaving(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
     const { error } = await supabase.from("goals").insert([
       {
-        user_id: user?.id,
         name: form.name,
         target_amount: parseFloat(form.target_amount),
         current_amount: parseFloat(form.current_amount || "0"),

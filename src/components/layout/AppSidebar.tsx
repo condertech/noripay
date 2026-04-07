@@ -129,9 +129,18 @@ export function AppSidebar() {
       <SidebarFooter className="p-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="h-10 rounded-lg">
-              <Settings className="h-[18px] w-[18px]" />
-              {!collapsed && <span>Configuracoes</span>}
+            <SidebarMenuButton
+              asChild
+              isActive={isActive("/configuracoes")}
+              className="h-10 rounded-lg transition-all duration-200"
+            >
+              <NavLink
+                to="/configuracoes"
+                activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+              >
+                <Settings className="h-[18px] w-[18px]" />
+                {!collapsed && <span>Configurações</span>}
+              </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
